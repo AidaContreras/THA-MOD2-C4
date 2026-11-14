@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trayectoria Hipotética de Aprendizaje · Módulo 2 ALEV · ExperTIC UIS</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- KaTeX for crisp mathematical formulas -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script>
+    function renderMathInDocument() {
+      if (window.renderMathInElement) {
+        renderMathInElement(document.body, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ],
+          throwOnError: false
+        });
+      }
+    }
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInDocument()"></script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            whDark: '#070f1e',
+            whNavy: '#0c1a30',
+            whCard: 'rgba(12, 26, 48, 0.92)',
+            whBorder: 'rgba(56, 189, 248, 0.28)',
+            whOrange: '#f97316',
+            whOrangeHover: '#ea580c',
+            whEmerald: '#10b981',
+            whCyan: '#38bdf8',
+          },
+          boxShadow: {
+            'glow-orange': '0 0 25px -4px rgba(249, 115, 22, 0.55)',
+            'glow-cyan': '0 0 25px -4px rgba(56, 189, 248, 0.55)',
+            'glow-green': '0 0 25px -4px rgba(16, 185, 129, 0.55)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #060d19;
+      color: #f1f5f9;
+      overflow-x: hidden;
+    }
+
+    .font-hud {
+      font-family: 'Orbitron', monospace;
+    }
+
+    /* Automated Warehouse Background matching the series */
+    .warehouse-bg {
+      background-color: #070e1b;
+      background-image: 
+        radial-gradient(circle at 50% 20%, rgba(14, 165, 233, 0.20) 0%, transparent 60%),
+        radial-gradient(circle at 80% 80%, rgba(249, 115, 22, 0.18) 0%, transparent 55%),
+        linear-gradient(rgba(7, 15, 30, 0.88), rgba(5, 11, 20, 0.94)),
+        url("imagenes/bodega.jpeg"),
+        url("bodega.jpeg");
+      background-position: center center;
+      background-size: cover;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+    }
+
+    .character-hero-card {
+      filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.8));
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .character-hero-card:hover {
+      transform: translateY(-4px) scale(1.02);
+    }
+
+    .fade-anim {
+      animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #091322; }
+    ::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #f97316; }
+  </style>
+</head>
+
+<body class="warehouse-bg min-h-screen flex flex-col justify-between selection:bg-orange-500 selection:text-white text-slate-200">
+
+  <!-- HUD TOP BAR (Aparece en pantallas internas con título pequeño y navegación) -->
+  <header id="compact-header" class="border-b border-whBorder bg-whDark/90 backdrop-blur-md sticky top-0 z-40 px-3 py-2 sm:px-6 hidden">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      
+      <!-- Título Pequeño en Pantallas Internas -->
+      <div class="flex items-center gap-2 cursor-pointer" onclick="goToMoment(0)">
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-whCyan to-blue-500 flex items-center justify-center text-whDark text-sm shadow-glow-cyan font-black">
+          <i class="fa-solid fa-arrows-split-up-and-left"></i>
+        </div>
+        <div>
+          <h1 class="text-xs font-bold tracking-wide text-white flex items-center gap-1.5">
+            THA · MÓDULO 2 <span class="text-[8px] uppercase bg-whCyan/20 text-whCyan px-1.5 py-0.2 rounded border border-whCyan/30 font-hud">ALEV · UIS</span>
+          </h1>
+          <p class="text-[9px] text-slate-400 font-hud hidden sm:block">UNA RUTA PROGRAMADA, NUEVAS MISIONES: TRANSFORMAR EL MOVIMIENTO</p>
+        </div>
+      </div>
+
+      <!-- Barra de Navegación por Momentos -->
+      <nav id="header-nav" class="flex flex-wrap items-center gap-1 text-[11px] font-hud">
+        <button onclick="goToMoment(0)" id="hnav-m0" class="px-2.5 py-1.5 rounded-lg border border-slate-700 bg-whNavy hover:bg-slate-800 text-slate-300 transition flex items-center gap-1">
+          <i class="fa-solid fa-house"></i>
+          <span>Inicio</span>
+        </button>
+        <button onclick="goToMoment(1)" id="hnav-m1" class="px-2.5 py-1.5 rounded-lg border border-slate-700 bg-whNavy hover:bg-slate-800 text-slate-300 transition flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-whCyan"></span>
+          <span>Momento 1</span>
+        </button>
+        <button onclick="goToMoment(2)" id="hnav-m2" class="px-2.5 py-1.5 rounded-lg border border-slate-700 bg-whNavy hover:bg-slate-800 text-slate-300 transition flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+          <span>Momento 2</span>
+        </button>
+        <button onclick="goToMoment(3)" id="hnav-m3" class="px-2.5 py-1.5 rounded-lg border border-slate-700 bg-whNavy hover:bg-slate-800 text-slate-300 transition flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-whEmerald"></span>
+          <span>Momento 3</span>
+        </button>
+      </nav>
+
+      <!-- Audio y Acciones -->
+      <div class="flex items-center gap-2">
+        <button onclick="toggleAudio()" id="btn-sound" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-whCyan border border-whCyan/40 transition text-xs shadow-glow-cyan" title="Alternar Sonido y Música">
+          <i class="fa-solid fa-volume-high"></i>
+        </button>
+
+        <!-- Botón Créditos -->
+        <div class="relative group">
+          <button type="button" onmouseenter="playFx('click')" class="px-3 py-1.5 rounded-xl bg-whNavy hover:bg-slate-800 text-cyan-200 hover:text-whCyan border border-whCyan/40 transition text-xs font-hud font-bold flex items-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-users text-whCyan"></i>
+            <span>Créditos</span>
+          </button>
+          <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 absolute right-0 top-full mt-2 w-[270px] sm:w-[295px] p-4 rounded-2xl bg-[#050b16] border-2 border-whCyan/80 shadow-[0_20px_50px_rgba(0,0,0,0.95)] z-50 text-left pointer-events-none font-sans">
+            <div class="text-[10px] font-hud text-whCyan uppercase tracking-wider leading-snug font-bold border-b border-whCyan/30 pb-1.5 mb-2.5">
+              Colectivo Docente · Escuela de Matemáticas UIS
+            </div>
+            <div class="grid grid-cols-1 gap-2 text-xs text-slate-100 font-medium">
+              <div class="flex items-center gap-2 bg-whNavy/70 px-3 py-1.5 rounded-xl border border-whCyan/25">
+                <i class="fa-solid fa-user-tie text-whCyan text-[11px] shrink-0"></i>
+                <span>Yor Yimer Díaz Méndez</span>
+              </div>
+              <div class="flex items-center gap-2 bg-whNavy/70 px-3 py-1.5 rounded-xl border border-whCyan/25">
+                <i class="fa-solid fa-user-tie text-whCyan text-[11px] shrink-0"></i>
+                <span>Astrid Liliana Contreras Mendoza</span>
+              </div>
+            </div>
+            <div class="mt-2.5 pt-2 border-t border-whCyan/25 text-[10px] text-slate-400 font-mono">
+              Proyecto ExperTIC · ALEV · UIS
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL DINÁMICO -->
+  <main id="app-viewport" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 pt-6 pb-24 flex flex-col justify-center">
+    <!-- Generado dinámicamente mediante JavaScript -->
+  </main>
+
+  <!-- FOOTER HOMOLOGADO FIJO CON LOGO UIS AMPLIADO, MOUSEOVER Y CC -->
+  <footer class="fixed bottom-0 left-0 right-0 z-40 border-t border-whBorder/80 bg-whDark/95 backdrop-blur-md py-3.5 sm:py-4 px-4 sm:px-8 shadow-[0_-12px_35px_rgba(0,0,0,0.9)]">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
+      
+      <!-- Izquierda: Estado del Proyecto -->
+      <div class="flex items-center gap-2.5 text-slate-200 order-2 md:order-none">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-whEmerald animate-pulse shadow-glow-green"></span>
+        <span class="font-semibold tracking-wide text-xs sm:text-sm">ExperTIC · Álgebra Lineal y Espacios Vectoriales · UIS</span>
+      </div>
+
+      <!-- Centro: Logo UIS Ampliado con Hover +50% y Tooltip Mouseover -->
+      <div class="relative group flex items-center justify-center order-1 md:order-none">
+        <img src="imagenes/logo-uis.png" 
+             alt="Universidad Industrial de Santander" 
+             onmouseenter="playFx('click')"
+             class="h-11 sm:h-12 w-auto object-contain brightness-110 group-hover:scale-150 origin-bottom transition-transform duration-300 cursor-pointer drop-shadow-[0_2px_14px_rgba(255,255,255,0.25)]"
+             onerror="if (this.src.indexOf('imagenes/') !== -1) { this.src='logo-uis.png'; } else { this.onerror=null; this.src='https://placehold.co/200x50/0c1a30/ffffff?text=UIS'; }" />
+
+        <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 absolute bottom-full mb-5 left-1/2 -translate-x-1/2 w-72 p-3.5 rounded-2xl bg-[#050b16] border-2 border-whCyan/80 shadow-[0_-20px_50px_rgba(0,0,0,0.95)] z-50 text-center pointer-events-none">
+          <div class="text-[10px] font-hud text-whCyan uppercase tracking-widest font-bold">
+            Universidad Industrial de Santander
+          </div>
+          <div class="text-xs text-slate-100 font-semibold mt-1">
+            Escuela de Matemáticas · Facultad de Ciencias
+          </div>
+          <div class="text-[10px] text-slate-400 font-mono mt-1">
+            Bucaramanga · Santander · Colombia
+          </div>
+        </div>
+      </div>
+
+      <!-- Derecha: Personajes y Botón CC -->
+      <div class="hidden md:flex items-center gap-2 text-[11px] font-hud text-slate-300">
+        <span class="bg-whNavy/90 px-2.5 py-1 rounded-lg border border-orange-500/40 text-orange-300 font-semibold">
+          <i class="fa-solid fa-user-tie text-whOrange mr-1"></i> Profe Ana
+        </span>
+        <span class="bg-whNavy/90 px-2.5 py-1 rounded-lg border border-emerald-500/40 text-emerald-300 font-semibold">
+          <i class="fa-solid fa-laptop-code text-whEmerald mr-1"></i> Mateo
+        </span>
+        <span class="bg-whNavy/90 px-2.5 py-1 rounded-lg border border-cyan-500/40 text-cyan-300 font-semibold">
+          <i class="fa-solid fa-robot text-whCyan mr-1"></i> Eliot (Robot)
+        </span>
+
+        <!-- Botón CC (Creative Commons) -->
+        <div class="relative group ml-1">
+          <button type="button" onmouseenter="playFx('click')" class="px-2.5 py-1 rounded-lg bg-whNavy hover:bg-emerald-950/90 text-emerald-300 hover:text-whEmerald border border-emerald-500/45 transition text-[11px] font-hud font-bold flex items-center gap-1 shadow-sm" aria-label="Licencia Creative Commons">
+            <i class="fa-brands fa-creative-commons text-xs text-whEmerald"></i>
+            <span>CC</span>
+          </button>
+          <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 absolute right-0 bottom-full mb-2.5 w-80 p-4 rounded-2xl bg-[#050b16] border-2 border-whEmerald/80 shadow-[0_-20px_50px_rgba(0,0,0,0.95)] z-50 text-left pointer-events-none font-sans">
+            <div class="flex items-center gap-2 text-[11px] font-hud text-whEmerald uppercase tracking-wider font-bold border-b border-emerald-500/30 pb-1.5 mb-2">
+              <i class="fa-brands fa-creative-commons text-base"></i>
+              <i class="fa-brands fa-creative-commons-by text-base"></i>
+              <i class="fa-brands fa-creative-commons-nc text-base"></i>
+              <i class="fa-brands fa-creative-commons-sa text-base"></i>
+              <span>CC BY-NC-SA 4.0</span>
+            </div>
+            <p class="text-xs text-slate-100 leading-relaxed">
+              <strong>Atribución – NoComercial – CompartirIgual 4.0 Internacional:</strong> Permite compartir y adaptar este recurso con fines educativos no comerciales, dando el crédito correspondiente al colectivo UIS y manteniendo la misma licencia.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <script>
+    'use strict';
+
+    /* ==========================================================
+       1. SYNTHETIC AUDIO & BGM ENGINE
+       ========================================================== */
+    let audioCtx = null;
+    let soundEnabled = true;
+    let bgmInterval = null;
+    let bgmGainNode = null;
+    let isBgmPlaying = false;
+
+    function getAudioContext() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function startProceduralBgm() {
+      if (!soundEnabled || isBgmPlaying) return;
+      try {
+        const ctx = getAudioContext();
+        if (!bgmGainNode) {
+          bgmGainNode = ctx.createGain();
+          bgmGainNode.gain.setValueAtTime(0.035, ctx.currentTime);
+          bgmGainNode.connect(ctx.destination);
+        }
+        const chords = [
+          [146.83, 174.61, 220.00, 261.63],
+          [98.00, 233.08, 293.66, 349.23],
+          [116.54, 146.83, 174.61, 220.00],
+          [130.81, 164.81, 196.00, 246.94]
+        ];
+        let chordStep = 0, noteStep = 0;
+        isBgmPlaying = true;
+        bgmInterval = setInterval(() => {
+          if (!soundEnabled || !isBgmPlaying) return;
+          try {
+            const now = ctx.currentTime;
+            const currentChord = chords[chordStep];
+            const freq = currentChord[noteStep % currentChord.length];
+            const osc = ctx.createOscillator();
+            const noteGain = ctx.createGain();
+            osc.type = (noteStep % 2 === 0) ? 'sine' : 'triangle';
+            osc.frequency.setValueAtTime(freq * 1.5, now);
+            noteGain.gain.setValueAtTime(0.001, now);
+            noteGain.gain.linearRampToValueAtTime(0.045, now + 0.08);
+            noteGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.85);
+            osc.connect(noteGain);
+            noteGain.connect(bgmGainNode);
+            osc.start(now);
+            osc.stop(now + 0.9);
+            noteStep++;
+            if (noteStep % 4 === 0) chordStep = (chordStep + 1) % chords.length;
+          } catch(e) {}
+        }, 560);
+      } catch(e) {}
+    }
+
+    function stopProceduralBgm() {
+      isBgmPlaying = false;
+      if (bgmInterval) {
+        clearInterval(bgmInterval);
+        bgmInterval = null;
+      }
+    }
+
+    function toggleAudio() {
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById('btn-sound');
+      if (soundEnabled) {
+        if (btn) {
+          btn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+          btn.classList.replace('text-slate-500', 'text-slate-300');
+        }
+        startProceduralBgm();
+        playFx('click');
+      } else {
+        if (btn) {
+          btn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+          btn.classList.replace('text-slate-300', 'text-slate-500');
+        }
+        stopProceduralBgm();
+      }
+    }
+
+    function playFx(type) {
+      if (!soundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (type === 'click') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.exponentialRampToValueAtTime(320, now + 0.08);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.linearRampToValueAtTime(0, now + 0.08);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'success') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.setValueAtTime(554.37, now + 0.09);
+          osc.frequency.setValueAtTime(659.25, now + 0.18);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.linearRampToValueAtTime(0, now + 0.32);
+          osc.start(now);
+          osc.stop(now + 0.32);
+        } else if (type === 'error') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.setValueAtTime(150, now + 0.15);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.linearRampToValueAtTime(0, now + 0.25);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        }
+      } catch(e) {}
+    }
+
+    /* ==========================================================
+       2. CHARACTERS ASSETS
+       ========================================================== */
+    const CHARACTERS = {
+      anaWelcome: {
+        name: "Profe Ana",
+        role: "Líder Pedagógica",
+        src: "imagenes/Ana4.png",
+        altSrc: "Ana4.png",
+        cropClass: "w-48 sm:w-56 md:w-64 lg:w-72 h-72 sm:h-84 md:h-[390px] lg:h-[430px] object-cover object-top rounded-3xl border-2 border-whOrange/70 shadow-glow-orange bg-whNavy/40"
+      },
+      anaExplain: {
+        name: "Profe Ana",
+        role: "Docente de Operaciones",
+        src: "imagenes/Ana1.png",
+        altSrc: "Ana1.png",
+        cropClass: "w-40 sm:w-48 md:w-56 h-56 sm:h-68 md:h-[320px] object-cover object-top rounded-2xl border-2 border-whOrange/60 shadow-glow-orange bg-whNavy/40"
+      },
+      mateoConsole: {
+        name: "Mateo",
+        role: "Automatización & Software",
+        src: "imagenes/est2.png",
+        altSrc: "est2.png",
+        cropClass: "w-40 sm:w-48 md:w-56 h-56 sm:h-68 md:h-[320px] object-cover object-top rounded-2xl border-2 border-whEmerald/60 shadow-glow-green bg-whNavy/40"
+      },
+      eliotAGV: {
+        name: "Eliot",
+        role: "Robot Autónomo AGV",
+        src: "imagenes/robot2.png",
+        altSrc: "robot2.png",
+        cropClass: "w-44 sm:w-52 md:w-60 lg:w-64 h-60 sm:h-72 md:h-[340px] lg:h-[380px] object-contain rounded-3xl border-2 border-whCyan/60 shadow-glow-cyan bg-whNavy/60 p-3"
+      }
+    };
+
+    function renderHeroCharacter(charKey, badgeText = "") {
+      const charObj = CHARACTERS[charKey];
+      if (!charObj) return "";
+      return `
+        <div class="relative character-hero-card flex flex-col items-center">
+          <img src="${charObj.src}" 
+               alt="${charObj.name}" 
+               class="${charObj.cropClass}"
+               onerror="if (this.src.indexOf('imagenes/') !== -1) { this.src='${charObj.altSrc}'; } else { this.onerror=null; this.src='https://placehold.co/400x550/0c1a30/38bdf8?text=${encodeURIComponent(charObj.name)}'; }" />
+          
+          <div class="absolute -bottom-3 bg-whDark/95 border border-whBorder px-3.5 py-1 rounded-xl shadow-xl flex items-center gap-2 z-20">
+            <span class="w-2 h-2 rounded-full bg-whCyan animate-pulse"></span>
+            <span class="text-xs font-hud font-bold text-white tracking-wide uppercase">${charObj.name}</span>
+            ${badgeText ? `<span class="text-[10px] bg-whOrange/20 text-orange-300 px-2 py-0.5 rounded border border-whOrange/30 font-hud">${badgeText}</span>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    /* ==========================================================
+       3. NAVIGATION STATE
+       ========================================================== */
+    let currentMoment = 0; // 0: Portada, 1: Momento 1, 2: Momento 2, 3: Momento 3
+    let activeTaskInM2 = 1; // 1: Tarea 1, 2: Tarea 2, 3: Tarea 3, 4: Tarea 4
+
+    function updateNavHighlights(m) {
+      const header = document.getElementById('compact-header');
+      if (m === 0) {
+        if (header) header.classList.add('hidden');
+      } else {
+        if (header) header.classList.remove('hidden');
+        ['hnav-m0', 'hnav-m1', 'hnav-m2', 'hnav-m3'].forEach((id, idx) => {
+          const btn = document.getElementById(id);
+          if (!btn) return;
+          if (idx === m) {
+            btn.className = 'px-2.5 py-1.5 rounded-xl border border-whCyan bg-whCyan/20 text-whCyan font-bold shadow-glow-cyan transition flex items-center gap-1.5';
+          } else {
+            btn.className = 'px-2.5 py-1.5 rounded-xl border border-slate-700 bg-whNavy hover:bg-slate-800 text-slate-300 transition flex items-center gap-1.5';
+          }
+        });
+      }
+    }
+
+    function goToMoment(m) {
+      playFx('click');
+      currentMoment = m;
+      updateNavHighlights(m);
+      const viewport = document.getElementById('app-viewport');
+
+      if (m === 0) renderScreenHome(viewport);
+      else if (m === 1) renderScreenMomento1(viewport);
+      else if (m === 2) renderScreenMomento2(viewport);
+      else if (m === 3) renderScreenMomento3(viewport);
+
+      renderMathInDocument();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ==========================================================
+       PANTALLA INICIAL: MÓDULO 2 ALEV
+       ========================================================== */
+    function renderScreenHome(container) {
+      container.innerHTML = `
+        <div class="space-y-6 fade-anim w-full my-auto">
+          
+          <!-- BANNER PRINCIPAL: PROTAGÓNICO Y BIEN DISTRIBUIDO -->
+          <div class="text-center max-w-5xl mx-auto space-y-2">
+            <div class="flex justify-end mb-1">
+              <div class="relative group">
+                <button type="button" onmouseenter="playFx('click')" class="px-3 py-1.5 rounded-xl bg-whNavy/95 hover:bg-slate-800 text-cyan-200 hover:text-whCyan border border-whCyan/45 transition text-xs font-hud font-bold flex items-center gap-1.5 shadow-md">
+                  <i class="fa-solid fa-users text-whCyan"></i>
+                  <span>Créditos</span>
+                </button>
+                <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 absolute right-0 top-full mt-2 w-[270px] sm:w-[295px] p-4 rounded-2xl bg-[#050b16] border-2 border-whCyan/80 shadow-[0_20px_50px_rgba(0,0,0,0.95)] z-50 text-left pointer-events-none font-sans">
+                  <div class="text-[10px] font-hud text-whCyan uppercase tracking-wider leading-snug font-bold border-b border-whCyan/30 pb-1.5 mb-2.5">
+                    Colectivo Docente · Escuela de Matemáticas UIS
+                  </div>
+                  <div class="grid grid-cols-1 gap-2 text-xs text-slate-100 font-medium">
+                    <div class="flex items-center gap-2 bg-whNavy/70 px-3 py-1.5 rounded-xl border border-whCyan/25">
+                      <i class="fa-solid fa-user-tie text-whCyan text-[11px] shrink-0"></i>
+                      <span>Yor Yimer Díaz Méndez</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-whNavy/70 px-3 py-1.5 rounded-xl border border-whCyan/25">
+                      <i class="fa-solid fa-user-tie text-whCyan text-[11px] shrink-0"></i>
+                      <span>Astrid Liliana Contreras Mendoza</span>
+                    </div>
+                  </div>
+                  <div class="mt-2.5 pt-2 border-t border-whCyan/25 text-[10px] text-slate-400 font-mono">
+                    Proyecto ExperTIC · ALEV · UIS
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-whCyan/10 border border-whCyan/30 text-whCyan text-xs font-hud tracking-widest uppercase shadow-sm">
+              <span class="w-2 h-2 rounded-full bg-whCyan animate-pulse"></span>
+              Convocatoria ExperTIC Ciclo Común 2026 · UIS Escuela de Matemáticas
+            </div>
+
+            <!-- TÍTULO PRINCIPAL: GRANDE, CLARO Y HORIZONTALMENTE BALANCEADO -->
+            <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
+              TRAYECTORIA HIPOTÉTICA DE APRENDIZAJE
+              <span class="block sm:inline sm:ml-2 text-transparent bg-clip-text bg-gradient-to-r from-whOrange via-amber-400 to-whCyan font-hud text-xl sm:text-2xl md:text-3xl lg:text-4xl">
+                · MÓDULO 2 ALEV
+              </span>
+            </h1>
+
+            <p class="text-sm sm:text-base text-slate-300 font-medium max-w-3xl mx-auto leading-relaxed">
+              «Una ruta programada, nuevas misiones: transformar el movimiento de un robot»
+            </p>
+            <p class="text-slate-400 font-mono text-xs sm:text-sm whitespace-nowrap overflow-x-auto max-w-full mx-auto">
+              (Yor Yimer Díaz Méndez & Astrid Liliana Contreras Mendoza)
+            </p>
+          </div>
+
+          <!-- TARJETA PRINCIPAL: LLENA NATURALMENTE LA PANTALLA -->
+          <div class="bg-whCard border-2 border-whBorder p-6 sm:p-8 lg:p-10 rounded-3xl shadow-2xl backdrop-blur-md max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              
+              <!-- Personajes Protagonistas con presencia imponente -->
+              <div class="lg:col-span-5 flex items-end justify-center -space-x-10 pb-4 lg:pb-0">
+                ${renderHeroCharacter('anaWelcome', 'PROFE ANA')}
+                ${renderHeroCharacter('eliotAGV', 'ROBOT ELIOT')}
+              </div>
+
+              <!-- Contextualización y Momentos con generoso espacio -->
+              <div class="lg:col-span-7 space-y-5">
+                
+                <!-- Pregunta detonante oficial -->
+                <div class="p-4 sm:p-5 bg-slate-900/90 rounded-2xl border-l-4 border-whCyan text-slate-200 text-sm sm:text-base leading-relaxed space-y-2 shadow-inner">
+                  <p>
+                    <strong class="text-whCyan font-hud">Pregunta central:</strong> 
+                    <span class="font-semibold text-white">¿Cómo transformar una trayectoria conocida, qué propiedades conserva esa transformación y cuándo es posible recuperar el recorrido original?</span>
+                  </p>
+                  <p class="text-slate-300 text-xs sm:text-sm">
+                    Espacio articulador: $V = \\mathcal{P}_2(\\mathbb{R}) \\times \\mathcal{P}_2(\\mathbb{R})$ con $\\dim(V) = 6$. Transformaciones matriciales $(T_A r)(t) = A r(t)$, proyecciones, núcleo, imagen e isomorfismos.
+                  </p>
+                </div>
+
+                <!-- Las 3 Fases del Aprendizaje (Momentos 1, 2 y 3) -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                  <div onclick="goToMoment(1)" class="cursor-pointer p-4 bg-whNavy/90 rounded-2xl border border-whCyan/40 hover:border-whCyan hover:shadow-glow-cyan transition flex flex-col justify-between group">
+                    <div>
+                      <span class="text-[10px] font-hud text-whCyan block uppercase tracking-wider">MOMENTO 1</span>
+                      <strong class="text-sm text-white group-hover:text-whCyan transition block leading-tight mt-1">Explorar y conjeturar</strong>
+                      <span class="text-xs text-slate-400 block mt-1">¿Adaptar sin reprogramar?</span>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between text-xs text-whCyan font-hud pt-2 border-t border-slate-800/80">
+                      <span>Explorar</span>
+                      <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                  </div>
+
+                  <div onclick="goToMoment(2)" class="cursor-pointer p-4 bg-whNavy/90 rounded-2xl border border-amber-500/40 hover:border-amber-400 hover:shadow-lg transition flex flex-col justify-between group">
+                    <div>
+                      <span class="text-[10px] font-hud text-amber-400 block uppercase tracking-wider">MOMENTO 2</span>
+                      <strong class="text-sm text-white group-hover:text-amber-300 transition block leading-tight mt-1">Modelar y comprobar</strong>
+                      <span class="text-xs text-slate-400 block mt-1">4 Tareas progresivas</span>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between text-xs text-amber-300 font-hud pt-2 border-t border-slate-800/80">
+                      <span>Explorar</span>
+                      <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                  </div>
+
+                  <div onclick="goToMoment(3)" class="cursor-pointer p-4 bg-whNavy/90 rounded-2xl border border-whEmerald/40 hover:border-whEmerald hover:shadow-glow-green transition flex flex-col justify-between group">
+                    <div>
+                      <span class="text-[10px] font-hud text-emerald-400 block uppercase tracking-wider">MOMENTO 3</span>
+                      <strong class="text-sm text-white group-hover:text-emerald-300 transition block leading-tight mt-1">Formalizar y transferir</strong>
+                      <span class="text-xs text-slate-400 block mt-1">Recuperabilidad y derivada</span>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between text-xs text-emerald-300 font-hud pt-2 border-t border-slate-800/80">
+                      <span>Explorar</span>
+                      <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Barra de Acciones y Botón Comenzar -->
+                <div class="pt-3 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800/80">
+                  <span class="text-xs sm:text-sm text-slate-400 font-mono hidden sm:inline">
+                    <i class="fa-solid fa-layer-group text-whCyan mr-1.5"></i>Secuencia articuladora L2.1, L2.2 y L2.3
+                  </span>
+                  <button onclick="goToMoment(1)" class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-whOrange to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-sm sm:text-base transition-all duration-300 shadow-glow-orange flex items-center justify-center gap-2.5 group">
+                    <i class="fa-solid fa-compass"></i>
+                    <span>Comenzar Recorrido</span>
+                    <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                  </button>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      `;
+    }
+
+    /* ==========================================================
+       MOMENTO 1: EXPLORAR Y CONJETURAR (MÓDULO 2)
+       ========================================================== */
+    function renderScreenMomento1(container) {
+      container.innerHTML = `
+        <div class="space-y-5 fade-anim w-full max-w-6xl mx-auto my-auto">
+          
+          <!-- Encabezado Protagónico -->
+          <div class="flex items-center justify-between gap-4 bg-whCard border-2 border-whBorder p-4 sm:p-5 rounded-3xl backdrop-blur-md shadow-xl">
+            <div class="flex items-center gap-3.5">
+              <span class="w-11 h-11 rounded-2xl bg-whCyan/20 text-whCyan border border-whCyan/40 flex items-center justify-center text-base font-black font-hud shadow-glow-cyan">
+                M1
+              </span>
+              <div>
+                <span class="text-xs font-hud text-whCyan uppercase tracking-widest block">MOMENTO 1 · DESENCADENAMIENTO</span>
+                <h2 class="text-base sm:text-lg md:text-xl font-black text-white">¿Podemos adaptar una ruta sin programarla desde el principio?</h2>
+              </div>
+            </div>
+            <button onclick="goToMoment(0)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs sm:text-sm font-semibold text-slate-200 transition shrink-0 flex items-center gap-2">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Inicio</span>
+            </button>
+          </div>
+
+          <!-- Gráfico Interactivo de Rotación 90° y Preguntas -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+            
+            <!-- Canvas / SVG de Rotación Ampliado -->
+            <div class="lg:col-span-7 bg-whCard border-2 border-whBorder p-5 sm:p-6 rounded-3xl shadow-xl flex flex-col justify-between space-y-4">
+              <div>
+                <div class="flex items-center justify-between border-b border-slate-700/80 pb-3 mb-3">
+                  <h3 class="text-sm font-hud text-white font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-compass-drafting text-whCyan"></i>
+                    Diagrama 2: Ruta inicial $r(t)=(t,t^2)$ y rotación antihoraria $90^\\circ$
+                  </h3>
+                  <span class="text-xs font-mono text-whCyan bg-slate-900 px-3 py-1 rounded-lg border border-slate-700">R = [[0,-1],[1,0]]</span>
+                </div>
+
+                <!-- SVG Visualizer Ampliado -->
+                <div class="relative bg-[#081524] border-2 border-slate-700 rounded-2xl p-3 overflow-hidden flex items-center justify-center shadow-inner">
+                  <svg id="svg-routes-m2" viewBox="0 0 400 220" class="w-full h-auto max-h-[260px]" role="img">
+                    <defs>
+                      <pattern id="gridM2" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#13273d" stroke-width="0.8"/>
+                      </pattern>
+                    </defs>
+                    <rect width="400" height="220" fill="url(#gridM2)" />
+
+                    <!-- Ejes Cartesianos -->
+                    <line x1="200" y1="15" x2="200" y2="205" stroke="#334155" stroke-width="1.5" />
+                    <line x1="20" y1="180" x2="380" y2="180" stroke="#334155" stroke-width="1.5" />
+                    <text x="365" y="196" fill="#94a3b8" font-size="12" font-family="monospace">x</text>
+                    <text x="185" y="28" fill="#94a3b8" font-size="12" font-family="monospace">y</text>
+
+                    <!-- Origen O (0,0) -->
+                    <circle cx="200" cy="180" r="6" fill="#ffffff" stroke="#38bdf8" stroke-width="2" />
+                    <text x="185" y="202" fill="#ffffff" font-size="12" font-weight="bold">O</text>
+
+                    <!-- Ruta Original r(t) = (t, t^2) para t en [0,1] -->
+                    <!-- t=0: (200, 180), t=1: (320, 60) -->
+                    <path d="M 200 180 Q 260 180 320 60" stroke="#f1f5f9" stroke-width="3.5" fill="none" stroke-linecap="round" />
+                    <circle cx="320" cy="60" r="5" fill="#334155" stroke="#ffffff" stroke-width="2" />
+                    <text x="328" y="65" fill="#f1f5f9" font-size="12" font-weight="bold">r(t)</text>
+
+                    <!-- Ruta Rotada 90°: R r(t) = (-t^2, t) -->
+                    <!-- t=0: (200, 180), t=1: (80, 60) -->
+                    <path d="M 200 180 Q 200 120 80 60" stroke="#818cf8" stroke-width="3" stroke-dasharray="6 3.5" fill="none" stroke-linecap="round" />
+                    <circle cx="80" cy="60" r="5" fill="#818cf8" stroke="#ffffff" stroke-width="2" />
+                    <text x="24" y="65" fill="#818cf8" font-size="12" font-weight="bold">R r(t)</text>
+
+                    <!-- Arco de Giro 90° -->
+                    <path d="M 235 155 A 40 40 0 0 0 175 155" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="3 3" fill="none" />
+                    <text x="190" y="145" fill="#38bdf8" font-size="10" font-family="monospace">+90°</text>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Ecuaciones y Contraste de Linealidad -->
+              <div class="p-3.5 bg-slate-900/90 rounded-2xl border border-slate-800 text-sm text-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div>
+                  <strong class="text-whCyan font-hud">Ruta base:</strong> $r(t) = (t, t^2) \\implies R r(t) = (-t^2, t)$
+                </div>
+                <div class="text-amber-300 font-semibold text-xs sm:text-sm">
+                  Contraste: traslación $F(v) = v + c$ ($c \\neq 0$) o cuadrática $G(x,y)=(x^2,y)$ no son lineales.
+                </div>
+              </div>
+            </div>
+
+            <!-- Preguntas Orientadoras y Dificultades con Letra Aumentada -->
+            <div class="lg:col-span-5 space-y-4 flex flex-col justify-between">
+              
+              <!-- Preguntas Orientadoras -->
+              <div class="p-4 sm:p-5 bg-whNavy/95 border-2 border-whBorder rounded-3xl space-y-3 shadow-xl">
+                <h3 class="text-xs sm:text-sm font-hud text-whOrange uppercase tracking-wider font-bold flex items-center gap-2">
+                  <i class="fa-solid fa-circle-question"></i>Preguntas orientadoras
+                </h3>
+                <ul class="space-y-2 text-xs sm:text-sm text-slate-100">
+                  <li class="p-2.5 bg-slate-900/80 rounded-xl border border-slate-800 flex items-start gap-2.5">
+                    <span class="text-whCyan font-bold text-base leading-none mt-0.5">•</span>
+                    <span>¿Qué regla transforma todos los puntos de la ruta? ¿Qué ocurre con el origen?</span>
+                  </li>
+                  <li class="p-2.5 bg-slate-900/80 rounded-xl border border-slate-800 flex items-start gap-2.5">
+                    <span class="text-whCyan font-bold text-base leading-none mt-0.5">•</span>
+                    <span>¿La transformación preserva sumas y productos por escalares?</span>
+                  </li>
+                  <li class="p-2.5 bg-slate-900/80 rounded-xl border border-slate-800 flex items-start gap-2.5">
+                    <span class="text-whCyan font-bold text-base leading-none mt-0.5">•</span>
+                    <span>¿Pueden dos rutas distintas tener una misma imagen? ¿Siempre es recuperable?</span>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Dificultades Anticipadas -->
+              <div class="p-4 sm:p-5 bg-red-950/45 border-2 border-red-500/50 rounded-3xl space-y-2 shadow-xl">
+                <h3 class="text-xs sm:text-sm font-hud text-red-300 uppercase tracking-wider font-bold flex items-center gap-2">
+                  <i class="fa-solid fa-triangle-exclamation text-red-400"></i> Dificultades anticipadas a contrastar
+                </h3>
+                <ul class="list-disc pl-5 text-xs sm:text-sm text-red-100 space-y-1.5 leading-relaxed">
+                  <li>Considerar lineal toda fórmula matemática o creer que conservar el origen prueba linealidad.</li>
+                  <li>Asumir erróneamente que toda transformación geométrica tiene inversa.</li>
+                  <li>Confundir una posición puntual instantánea con una trayectoria completa en el tiempo.</li>
+                </ul>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Barra Inferior de Navegación -->
+          <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+            <button onclick="goToMoment(0)" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs sm:text-sm font-semibold text-slate-300 transition flex items-center gap-2">
+              <i class="fa-solid fa-house"></i>
+              <span>Inicio</span>
+            </button>
+            <button onclick="goToMoment(2)" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-whOrange to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs sm:text-sm font-bold transition shadow-glow-orange flex items-center gap-2">
+              <span>Avanzar a Momento 2: Tareas</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+
+        </div>
+      `;
+    }
+
+    /* ==========================================================
+       MOMENTO 2: MODELAR, COMPROBAR E INDAGAR (MÓDULO 2)
+       ========================================================== */
+    function renderScreenMomento2(container) {
+      container.innerHTML = `
+        <div class="space-y-5 fade-anim w-full max-w-6xl mx-auto my-auto">
+          
+          <!-- Encabezado Protagónico -->
+          <div class="flex items-center justify-between gap-4 bg-whCard border-2 border-whBorder p-4 sm:p-5 rounded-3xl backdrop-blur-md shadow-xl">
+            <div class="flex items-center gap-3.5">
+              <span class="w-11 h-11 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center justify-center text-base font-black font-hud shadow-lg">
+                M2
+              </span>
+              <div>
+                <span class="text-xs font-hud text-amber-400 tracking-widest uppercase block">MOMENTO 2 · ABORDAJE E INDAGACIÓN</span>
+                <h2 class="text-base sm:text-lg md:text-xl font-black text-white">Describir las transformaciones y explicar sus efectos</h2>
+              </div>
+            </div>
+            <button onclick="goToMoment(0)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs sm:text-sm font-semibold text-slate-200 transition shrink-0 flex items-center gap-2">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Inicio</span>
+            </button>
+          </div>
+
+          <!-- Selector de las 4 Tareas Progresivas -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <button onclick="switchTask(1)" id="btn-task-1" class="p-3 rounded-2xl border text-left transition ${activeTaskInM2 === 1 ? 'border-whCyan bg-whCyan/20 text-whCyan font-bold shadow-glow-cyan' : 'border-slate-700 bg-whNavy text-slate-300 hover:border-slate-600'}">
+              <span class="text-[10px] font-hud block text-whCyan">TAREA 1 · L2.1</span>
+              <span class="text-xs sm:text-sm block font-bold text-white mt-0.5">Linealidad y geometría</span>
+            </button>
+
+            <button onclick="switchTask(2)" id="btn-task-2" class="p-3 rounded-2xl border text-left transition ${activeTaskInM2 === 2 ? 'border-amber-400 bg-amber-500/20 text-amber-300 font-bold shadow-lg' : 'border-slate-700 bg-whNavy text-slate-300 hover:border-slate-600'}">
+              <span class="text-[10px] font-hud block text-amber-400">TAREA 2 · L2.2</span>
+              <span class="text-xs sm:text-sm block font-bold text-white mt-0.5">Núcleo e imagen</span>
+            </button>
+
+            <button onclick="switchTask(3)" id="btn-task-3" class="p-3 rounded-2xl border text-left transition ${activeTaskInM2 === 3 ? 'border-whEmerald bg-whEmerald/20 text-emerald-300 font-bold shadow-glow-green' : 'border-slate-700 bg-whNavy text-slate-300 hover:border-slate-600'}">
+              <span class="text-[10px] font-hud block text-emerald-400">TAREA 3 · L2.2</span>
+              <span class="text-xs sm:text-sm block font-bold text-white mt-0.5">Bases y muestreo E</span>
+            </button>
+
+            <button onclick="switchTask(4)" id="btn-task-4" class="p-3 rounded-2xl border text-left transition ${activeTaskInM2 === 4 ? 'border-whOrange bg-whOrange/20 text-orange-300 font-bold shadow-glow-orange' : 'border-slate-700 bg-whNavy text-slate-300 hover:border-slate-600'}">
+              <span class="text-[10px] font-hud block text-whOrange">TAREA 4 · L2.3</span>
+              <span class="text-xs sm:text-sm block font-bold text-white mt-0.5">Composición RS ≠ SR</span>
+            </button>
+          </div>
+
+          <!-- Contenido Dinámico de la Tarea Activa -->
+          <div id="task-content-container" class="bg-whCard border-2 border-whBorder p-6 sm:p-8 rounded-3xl shadow-2xl backdrop-blur-md min-h-[320px] flex flex-col justify-center">
+            <!-- Inyectado por switchTask -->
+          </div>
+
+          <!-- Barra Inferior de Navegación -->
+          <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+            <button onclick="goToMoment(1)" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs sm:text-sm font-semibold text-slate-300 transition flex items-center gap-2">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Momento 1</span>
+            </button>
+            <button onclick="goToMoment(3)" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-whOrange to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs sm:text-sm font-bold transition shadow-glow-orange flex items-center gap-2">
+              <span>Avanzar a Momento 3: Formalizar</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+
+        </div>
+      `;
+      switchTask(activeTaskInM2);
+    }
+
+    function switchTask(taskNum) {
+      playFx('click');
+      activeTaskInM2 = taskNum;
+
+      for (let i = 1; i <= 4; i++) {
+        const btn = document.getElementById(`btn-task-${i}`);
+        if (!btn) continue;
+        if (i === taskNum) {
+          btn.className = 'p-3 rounded-2xl border text-left transition border-whCyan bg-whCyan/20 text-whCyan font-bold shadow-glow-cyan';
+        } else {
+          btn.className = 'p-3 rounded-2xl border text-left transition border-slate-700 bg-whNavy text-slate-300 hover:border-slate-600';
+        }
+      }
+
+      const container = document.getElementById('task-content-container');
+      if (!container) return;
+
+      if (taskNum === 1) {
+        container.innerHTML = `
+          <div class="space-y-4 fade-anim">
+            <div class="flex items-center justify-between border-b border-slate-700/80 pb-3">
+              <div>
+                <span class="text-xs font-hud text-whCyan uppercase">TAREA 1 · LECCIÓN 2.1</span>
+                <h3 class="text-base sm:text-lg font-bold text-white">Linealidad y geometría de las transformaciones</h3>
+              </div>
+              <span class="text-sm font-mono text-whCyan bg-slate-900 px-3 py-1 rounded-xl border border-slate-700">T_A: V → V</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div class="p-4 bg-whNavy/90 rounded-2xl border border-whBorder space-y-2">
+                <strong class="text-whCyan block font-hud text-xs sm:text-sm">Operaciones en el Plano y Trayectorias:</strong>
+                <p class="text-slate-200 leading-relaxed text-sm">
+                  Rotaciones, estiramientos y cizallamientos actúan sobre cada posición y se extienden al espacio completo de trayectorias continuas:
+                </p>
+                <div class="p-3 bg-slate-950 rounded-xl text-center text-whCyan font-mono text-base border border-slate-800">
+                  $$(T_A r)(t) = A \\, r(t), \\quad A \\in \\mathbb{R}^{2 \\times 2}$$
+                </div>
+              </div>
+
+              <div class="p-4 bg-whNavy/90 rounded-2xl border border-whBorder space-y-2">
+                <strong class="text-amber-400 block font-hud text-xs sm:text-sm">Contraste Crucial de Linealidad:</strong>
+                <div class="space-y-2 text-xs sm:text-sm">
+                  <div class="p-2.5 bg-red-950/60 border border-red-500/50 rounded-xl text-red-200">
+                    <strong>Traslación $F(v) = v + c$ ($c \\neq 0$):</strong> Falla la condición del cero $F(0) = c \\neq 0$. No es transformación lineal.
+                  </div>
+                  <div class="p-2.5 bg-red-950/60 border border-red-500/50 rounded-xl text-red-200">
+                    <strong>$G(x,y) = (x^2, y)$:</strong> Conserva el origen $G(0)=0$ pero $G(2u) \\neq 2G(u)$. Tampoco es lineal.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3 bg-slate-900/90 rounded-2xl border border-slate-700 text-xs sm:text-sm text-slate-200">
+              <strong class="text-white font-hud">Propósito didáctico:</strong> Distinguir aditividad y homogeneidad, contrastando la acción puntual en el plano físico con el operador en el espacio vectorial $V$.
+            </div>
+          </div>
+        `;
+      } else if (taskNum === 2) {
+        container.innerHTML = `
+          <div class="space-y-4 fade-anim">
+            <div class="flex items-center justify-between border-b border-slate-700/80 pb-3">
+              <div>
+                <span class="text-xs font-hud text-amber-400 uppercase">TAREA 2 · LECCIÓN 2.2</span>
+                <h3 class="text-base sm:text-lg font-bold text-white">Núcleo, imagen y pérdida de información</h3>
+              </div>
+              <span class="text-sm font-mono text-amber-300 bg-slate-900 px-3 py-1 rounded-xl border border-slate-700">dim(ker P) + dim(Im P) = 6</span>
+            </div>
+
+            <div class="p-4 bg-slate-900/90 rounded-2xl border border-whBorder space-y-2">
+              <strong class="text-xs font-hud text-amber-400 block uppercase">Proyección Horizontal de Trayectorias:</strong>
+              <div class="p-3 bg-slate-950 rounded-xl text-center font-mono text-sm sm:text-base text-whCyan border border-slate-800">
+                $$P: V \\to V, \\quad P(x(t), y(t)) = (x(t), 0)$$
+              </div>
+              <p class="text-xs sm:text-sm text-slate-200">
+                Se conserva solo la componente horizontal. Toda la información vertical se proyecta a cero.
+              </p>
+            </div>
+
+            <!-- Diagrama 4 del Documento -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
+              <div class="p-3.5 bg-whNavy/90 rounded-2xl border border-slate-700 space-y-2">
+                <strong class="text-whCyan block font-hud text-xs sm:text-sm">Imagen de P ($\\\\dim = 3$):</strong>
+                <p class="text-slate-200 leading-relaxed font-mono text-center bg-slate-950 p-2 rounded-xl">
+                  $$\\operatorname{Im}(P) = \\{ (x(t), 0) : x \\in \\mathcal{P}_2(\\mathbb{R}) \\}$$
+                </p>
+                <p class="text-slate-300">Trayectorias confinadas al eje horizontal.</p>
+              </div>
+
+              <div class="p-3.5 bg-whNavy/90 rounded-2xl border border-red-500/50 bg-red-950/20 space-y-2">
+                <strong class="text-red-400 block font-hud text-xs sm:text-sm">Núcleo ker P ($\\\\dim = 3$):</strong>
+                <p class="text-slate-200 leading-relaxed font-mono text-center bg-slate-950 p-2 rounded-xl">
+                  $$\\ker(P) = \\{ (0, y(t)) : y \\in \\mathcal{P}_2(\\mathbb{R}) \\}$$
+                </p>
+                <p class="text-red-200">La componente vertical se pierde irreversiblemente; no hay reconstrucción única.</p>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (taskNum === 3) {
+        container.innerHTML = `
+          <div class="space-y-4 fade-anim">
+            <div class="flex items-center justify-between border-b border-slate-700/80 pb-3">
+              <div>
+                <span class="text-xs font-hud text-emerald-400 uppercase">TAREA 3 · LECCIÓN 2.2</span>
+                <h3 class="text-base sm:text-lg font-bold text-white">Matrices en distintas bases y muestreo temporal</h3>
+              </div>
+              <span class="text-sm font-mono text-emerald-300 bg-slate-900 px-3 py-1 rounded-xl border border-slate-700">E: V → ℝ⁶</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
+              <div class="p-4 bg-whNavy rounded-2xl border border-whCyan/40 space-y-2">
+                <strong class="text-whCyan block font-hud text-xs">Representación Matricial:</strong>
+                <p class="text-slate-200">
+                  Las columnas son las coordenadas de las imágenes de una base. Se contrasta la matriz $2\\times 2$ sobre posiciones con la matriz $6\\times 6$ sobre el espacio $V$.
+                </p>
+              </div>
+
+              <div class="p-4 bg-whNavy rounded-2xl border border-emerald-500/40 space-y-2">
+                <strong class="text-emerald-400 block font-hud text-xs">Registro de Información (Muestreo):</strong>
+                <p class="text-slate-200">
+                  Mediciones discretas en tres instantes de tiempo $t = 0, \\frac{1}{2}, 1$:
+                </p>
+              </div>
+            </div>
+
+            <!-- Operador de Evaluación E -->
+            <div class="p-4 bg-slate-900/90 rounded-2xl border border-whBorder flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div class="text-center sm:text-left">
+                <span class="text-xs font-hud text-slate-300 uppercase block mb-1">Vector de Telemetría Discreta:</span>
+                <span class="font-mono text-sm sm:text-base text-whCyan">
+                  $$E(r) = (x(0), y(0), x(1/2), y(1/2), x(1), y(1))^T \\in \\mathbb{R}^6$$
+                </span>
+              </div>
+              <div class="p-3 bg-emerald-950/60 border border-emerald-500/50 rounded-2xl text-xs sm:text-sm text-emerald-200 max-w-sm">
+                <strong>Reconstrucción Única:</strong> 6 datos independientes determinan de manera única los 6 coeficientes cuadráticos de $r(t)$. Disponer solo de inicio y fin (4 datos) dejaría 2 grados libres sin registrar.
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (taskNum === 4) {
+        container.innerHTML = `
+          <div class="space-y-4 fade-anim">
+            <div class="flex items-center justify-between border-b border-slate-700/80 pb-3">
+              <div>
+                <span class="text-xs font-hud text-whOrange uppercase">TAREA 4 · LECCIÓN 2.3</span>
+                <h3 class="text-base sm:text-lg font-bold text-white">Composición, inversas y reconstrucción</h3>
+              </div>
+              <span class="text-sm font-mono text-whOrange bg-slate-900 px-3 py-1 rounded-xl border border-slate-700">RS ≠ SR</span>
+            </div>
+
+            <!-- Diagrama 5: No conmutatividad -->
+            <div class="p-4 bg-slate-900/90 rounded-2xl border border-whBorder space-y-3">
+              <span class="text-xs font-hud text-slate-300 uppercase block">Diagrama 5: La composición depende del orden</span>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm font-mono">
+                <div class="p-3 bg-sky-950 border border-whCyan text-whCyan rounded-xl">
+                  <strong>Rotación 90°:</strong> $R = \\begin{pmatrix} 0 & -1 \\\\ 1 & 0 \\end{pmatrix}$
+                </div>
+                <div class="p-3 bg-indigo-950 border border-indigo-400 text-indigo-300 rounded-xl">
+                  <strong>Estiramiento 2x:</strong> $S = \\begin{pmatrix} 2 & 0 \\\\ 0 & 1 \\end{pmatrix}$
+                </div>
+              </div>
+
+              <div class="p-3 bg-slate-950 rounded-xl text-center text-xs sm:text-sm text-white font-mono border border-slate-800">
+                $$RS = \\begin{pmatrix} 0 & -1 \\\\ 2 & 0 \\end{pmatrix} \\quad \\neq \\quad SR = \\begin{pmatrix} 0 & -2 \\\\ 1 & 0 \\end{pmatrix}$$
+              </div>
+            </div>
+
+            <!-- Reversibilidad e Isomorfismo -->
+            <div class="grid grid-cols-2 gap-3 text-xs sm:text-sm">
+              <div class="p-3.5 bg-whNavy/90 rounded-2xl border border-whEmerald/40">
+                <strong class="text-whEmerald block font-hud text-xs sm:text-sm mb-1">Isomorfismo e Inversas:</strong>
+                <p class="text-slate-200 leading-relaxed">Si $\\det A \\neq 0$, existe $T^{-1} = T_{A^{-1}}$ y la trayectoria se recupera exactamente.</p>
+              </div>
+
+              <div class="p-3.5 bg-whNavy/90 rounded-2xl border border-red-500/40">
+                <strong class="text-red-400 block font-hud text-xs sm:text-sm mb-1">Mito de Dimensión:</strong>
+                <p class="text-slate-200 leading-relaxed">Dimensiones iguales no garantizan invertibilidad (ejemplo: la proyección $P: V \\to V$ tiene $\\det P = 0$).</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      renderMathInDocument();
+    }
+
+    /* ==========================================================
+       MOMENTO 3: FORMALIZACIÓN Y TRANSFERENCIA (MÓDULO 2)
+       ========================================================== */
+    function renderScreenMomento3(container) {
+      container.innerHTML = `
+        <div class="space-y-5 fade-anim w-full max-w-6xl mx-auto my-auto">
+          
+          <!-- Encabezado Protagónico -->
+          <div class="flex items-center justify-between gap-4 bg-whCard border-2 border-whBorder p-4 sm:p-5 rounded-3xl backdrop-blur-md shadow-xl">
+            <div class="flex items-center gap-3.5">
+              <span class="w-11 h-11 rounded-2xl bg-whEmerald/20 text-emerald-300 border border-whEmerald/40 flex items-center justify-center text-base font-black font-hud shadow-glow-green">
+                M3
+              </span>
+              <div>
+                <span class="text-xs font-hud text-whEmerald tracking-widest uppercase block">MOMENTO 3 · SÍNTESIS Y TRANSFERENCIA</span>
+                <h2 class="text-base sm:text-lg md:text-xl font-black text-white">Transformar, justificar y recuperar una trayectoria</h2>
+              </div>
+            </div>
+            <button onclick="goToMoment(0)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs sm:text-sm font-semibold text-slate-200 transition shrink-0 flex items-center gap-2">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Inicio</span>
+            </button>
+          </div>
+
+          <!-- Diagrama 6 de Evidencias Ampliado -->
+          <div class="bg-whCard border-2 border-whBorder p-6 sm:p-8 rounded-3xl shadow-2xl space-y-5">
+            <div class="border-b border-slate-700/80 pb-3 flex items-center justify-between">
+              <h3 class="text-sm sm:text-base font-hud text-white font-bold uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-diagram-project text-whEmerald"></i> Diagrama 6: Evidencias del cierre y transferencia
+              </h3>
+              <span class="text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/40 px-3 py-1 rounded-xl">EVIDENCIAS</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+              <div class="p-4 bg-whNavy/90 rounded-2xl border border-whCyan/40 space-y-2">
+                <span class="w-8 h-8 rounded-xl bg-whCyan/20 text-whCyan text-sm font-hud font-bold flex items-center justify-center mx-auto">1</span>
+                <strong class="text-white font-hud block text-xs sm:text-sm">Diseñar</strong>
+                <p class="text-slate-200 text-xs sm:text-sm leading-relaxed">Transformaciones de ruta para adaptar recorridos conocidos a nuevas misiones.</p>
+              </div>
+
+              <div class="p-4 bg-whNavy/90 rounded-2xl border border-amber-500/40 space-y-2">
+                <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 text-sm font-hud font-bold flex items-center justify-center mx-auto">2</span>
+                <strong class="text-white font-hud block text-xs sm:text-sm">Justificar</strong>
+                <p class="text-slate-200 text-xs sm:text-sm leading-relaxed">Matrices asociadas respecto de bases y análisis del orden en la composición.</p>
+              </div>
+
+              <div class="p-4 bg-whNavy/90 rounded-2xl border border-emerald-500/40 space-y-2">
+                <span class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-300 text-sm font-hud font-bold flex items-center justify-center mx-auto">3</span>
+                <strong class="text-white font-hud block text-xs sm:text-sm">Evaluar</strong>
+                <p class="text-slate-200 text-xs sm:text-sm leading-relaxed">Recuperación o pérdida de información a través del núcleo e inversibilidad.</p>
+              </div>
+            </div>
+
+            <!-- Transferencia a la Derivada -->
+            <div class="p-4 bg-slate-900/90 rounded-2xl border border-whOrange/50 space-y-2 text-xs sm:text-sm">
+              <strong class="text-whOrange font-hud block uppercase tracking-wider">Transferencia de Aprendizaje: Derivación en Polinomios</strong>
+              <div class="p-2.5 bg-slate-950 rounded-xl font-mono text-center text-whCyan border border-slate-800">
+                $$D: \\mathcal{P}_2(\\mathbb{R}) \\longrightarrow \\mathcal{P}_1(\\mathbb{R}), \\quad D(p) = p'$$
+              </div>
+              <p class="text-slate-200 leading-relaxed">
+                La derivación pierde la constante del polinomio ($\\ker D = \\mathcal{P}_0(\\mathbb{R})$ con $\\dim = 1$), demostrando formalmente por qué no admite recuperación única sin condiciones adicionales de frontera.
+              </p>
+            </div>
+
+            <!-- Resumen de Competencias Transversales UIS -->
+            <div class="p-4 bg-slate-900/90 rounded-2xl border border-slate-700 text-xs sm:text-sm">
+              <strong class="text-whEmerald font-hud block text-xs sm:text-sm uppercase tracking-wider mb-2">Alineación de Competencias de Cierre UIS:</strong>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-200">
+                <div class="flex items-center gap-2"><span class="text-whCyan font-bold">• mC2-P (Principal):</span> Transformaciones lineales en espacios de dimensión finita.</div>
+                <div class="flex items-center gap-2"><span class="text-amber-400 font-bold">• mC1-C:</span> Espacios, subespacios, núcleo e imagen.</div>
+                <div class="flex items-center gap-2"><span class="text-emerald-400 font-bold">• mC5-P:</span> Argumentación y pruebas mediante contraejemplos.</div>
+                <div class="flex items-center gap-2"><span class="text-whOrange font-bold">• mC6-A y mC7-A:</span> Autonomía, colaboración y revisión honesta.</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Barra Inferior de Navegación -->
+          <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+            <button onclick="goToMoment(2)" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs sm:text-sm font-semibold text-slate-300 transition flex items-center gap-2">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Momento 2</span>
+            </button>
+            <button onclick="goToMoment(0)" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-whOrange to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs sm:text-sm font-bold transition shadow-glow-orange flex items-center gap-2">
+              <i class="fa-solid fa-house"></i>
+              <span>Volver al Inicio</span>
+            </button>
+          </div>
+
+        </div>
+      `;
+    }
+
+    /* ==========================================================
+       INICIALIZACIÓN
+       ========================================================== */
+    window.onload = function() {
+      goToMoment(0);
+      const startBgmOnce = () => {
+        if (soundEnabled && !isBgmPlaying) startProceduralBgm();
+        document.removeEventListener('click', startBgmOnce);
+        document.removeEventListener('keydown', startBgmOnce);
+      };
+      document.addEventListener('click', startBgmOnce, { once: true });
+      document.addEventListener('keydown', startBgmOnce, { once: true });
+    };
+  </script>
+</body>
+</html>
